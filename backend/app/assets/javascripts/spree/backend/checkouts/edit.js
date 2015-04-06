@@ -6,7 +6,7 @@ $(document).ready(function() {
 
   formatCustomerResult = function(customer) {
     return customerTemplate({
-      customer: customer,
+      customer: customer.user,
       bill_address: customer.bill_address,
       ship_address: customer.ship_address
     })
@@ -17,7 +17,7 @@ $(document).ready(function() {
       placeholder: Spree.translations.choose_a_customer,
       ajax: {
         url: Spree.routes.user_search,
-        datatype: 'json',
+        dataType: 'json',
         data: function(term, page) {
           return {
             q: term,
@@ -25,14 +25,16 @@ $(document).ready(function() {
           }
         },
         results: function(data, page) {
+          console.log( data );
           return { results: data }
         }
       },
+      id: function(c) { return c.user.id; },
       dropdownCssClass: 'customer_search',
       formatResult: formatCustomerResult,
       formatSelection: function (customer) {
-        $('#order_email').val(customer.email);
-        $('#user_id').val(customer.id);
+        $('#order_email').val(customer.user.email);
+        $('#user_id').val(customer.user.id);
         $('#guest_checkout_true').prop("checked", false);
         $('#guest_checkout_false').prop("checked", true);
         $('#guest_checkout_false').prop("disabled", false);
@@ -53,7 +55,7 @@ $(document).ready(function() {
             });
           });
         }
-        return customer.email;
+        return customer.user.email;
       }
     })
   }
