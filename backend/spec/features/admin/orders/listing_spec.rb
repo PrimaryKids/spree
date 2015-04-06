@@ -70,6 +70,16 @@ describe "Orders Listing", type: :feature do
       within("table#listing_orders") { expect(page).not_to have_content("R100") }
     end
 
+    it "should return both complete and incomplete orders when only complete orders is not checked" do
+      Spree::Order.create! email: "incomplete@example.com", completed_at: nil, state: 'cart'
+      click_on 'Filter'
+      uncheck "q_completed_at_not_null"
+      click_on 'Filter Results'
+
+      expect(page).to have_content("R200")
+      expect(page).to have_content("incomplete@example.com")
+    end
+
     it "should be able to filter risky orders" do
       # Check risky and filter
       check "q_considered_risky_eq"
@@ -112,7 +122,9 @@ describe "Orders Listing", type: :feature do
 
       # Regression test for #4004
       it "should be able to go from page to page for incomplete orders" do
-        10.times { Spree::Order.create email: "incomplete@example.com" }
+        Spree::Order.destroy_all
+        2.times { Spree::Order.create! email: "incomplete@example.com", completed_at: nil, state: 'cart' }
+        click_on 'Filter'
         uncheck "q_completed_at_not_null"
         click_on 'Filter Results'
         within(".pagination") do
@@ -163,5 +175,22 @@ describe "Orders Listing", type: :feature do
       expect(page).not_to have_content("R200")
     end
 
+    context "filter on shipment state" do
+      it "only shows the orders with the selected shipment state" do
+        select Spree.t("payment_states.#{order1.shipment_state}"), from: "Shipment State"
+        click_on 'Filter Results'
+        within_row(1) { expect(page).to have_content("R100") }
+        within("table#listing_orders") { expect(page).not_to have_content("R200") }
+      end
+    end
+
+    context "filter on payment state" do
+      it "only shows the orders with the selected payment state" do
+        select Spree.t("payment_states.#{order1.payment_state}"), from: "Payment State"
+        click_on 'Filter Results'
+        within_row(1) { expect(page).to have_content("R100") }
+        within("table#listing_orders") { expect(page).not_to have_content("R200") }
+      end
+    end
   end
 end

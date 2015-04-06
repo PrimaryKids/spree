@@ -48,6 +48,10 @@ module Spree
       joins(:prices).where(deleted_at: nil).where('spree_prices.currency' => currency || Spree::Config[:currency]).where('spree_prices.amount IS NOT NULL')
     end
 
+    def self.having_orders
+      joins(:line_items).distinct
+    end
+
     def tax_category
       if self[:tax_category_id].nil?
         product.tax_category
@@ -173,7 +177,7 @@ module Spree
       return 0 unless options.present?
 
       options.keys.map { |key|
-        m = "#{options[key]}_price_modifier_amount".to_sym
+        m = "#{key}_price_modifier_amount".to_sym
         if self.respond_to? m
           self.send(m, options[key])
         else
