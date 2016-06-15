@@ -37,7 +37,7 @@ module Spree
           else
             @collection ||= Variant.only_deleted.where(:product_id => parent.id)
           end
-          @collection
+          @collection.sort_by{ |item| item[:sku] }
         end
 
       private
