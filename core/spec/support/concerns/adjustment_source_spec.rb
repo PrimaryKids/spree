@@ -1,3 +1,4 @@
+puts "!!loading adjustment source"
 shared_examples_for "an adjustment source" do
   subject(:source) { described_class.create }
 
